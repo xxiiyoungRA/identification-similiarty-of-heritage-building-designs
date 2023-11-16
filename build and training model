@@ -1,0 +1,78 @@
+base_model = DenseNet121( weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+
+# Freeze the layers in the base model
+for layer in base_model.layers:
+    layer.trainable = False
+
+# Build your custom head model
+x = base_model.output
+x = GlobalAveragePooling2D()(x)
+x = Dense(1024, activation='relu')(x)
+x = Dropout(0.5)(x)
+predictions = Dense(3, activation='softmax')(x)
+
+# Combine the base model and the custom head model
+model = Model(inputs=base_model.input, outputs=predictions)
+
+# Compile the model
+model.compile(optimizer=Adam(learning_rate=0.0001), loss='categorical_crossentropy', metrics=['accuracy'])
+
+# Print the model summary
+model.summary()
+
+checkpoint_filepath = os.path.join(root_path, 'skripsi.h5')
+
+model_checkpoint_callback = ModelCheckpoint(
+    filepath=checkpoint_filepath,
+    save_weights_only=False,
+    monitor='val_accuracy',
+    verbose=1,
+    mode='auto',
+    save_best_only=True)
+
+# Definisikan callback Early Stopping
+early_stopping = EarlyStopping(
+    monitor='val_loss',        # Berdasarkan penurunan val_loss
+    patience=5,                # Berhenti jika tidak ada perbaikan setelah 5 epoch
+    restore_best_weights=True  # Kembalikan berat model ke yang terbaik
+)
+
+# Fit model dengan Fine-tunning
+history = model.fit(
+    train_generator,
+    validation_data=val_generator,
+    steps_per_epoch=141,     # Total data / batch_size
+    epochs=15,
+    validation_steps=6,
+    verbose=1,
+    callbacks=[model_checkpoint_callback, early_stopping]
+)
+
+
+# ambil statistik pelatihan
+acc = history.history['accuracy']
+val_acc = history.history['val_accuracy']
+loss=history.history['loss']
+val_loss=history.history['val_loss']
+
+epochs = range(len(acc))
+
+# plot hasil akurasi pelatihan
+plt.figure(figsize=(10, 8))
+plt.subplot(1, 2, 1)
+plt.plot(epochs, acc, label='Training Accuracy')
+plt.plot(epochs, val_acc, label='Validation Accuracy')
+plt.legend(loc='lower right')
+plt.ylabel('accuracy')
+plt.xlabel('epochs')
+plt.title('Training Accuracy')
+
+# plot hasil loss pelatihan
+plt.subplot(1, 2, 2)
+plt.plot(epochs, loss, label='Training Loss')
+plt.plot(epochs, val_loss, label='Validation Loss')
+plt.legend(loc='upper right')
+plt.ylabel('loss')
+plt.xlabel('epochs')
+plt.title('Training Loss')
+plt.show()
