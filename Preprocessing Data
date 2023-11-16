@@ -1,0 +1,134 @@
+# lokasi dataset - ubah sesuai dengan lokasi anda mengupload folder datanya
+root_path = 'D:\Skirpsi\Risal\Dataset'
+
+# opsional - tampilkan info lokasi dataset
+print("Path root:", root_path)
+
+base_dir = os.path.join(os.path.dirname(root_path), 'Dataset')
+os.listdir(base_dir)
+
+datagen = ImageDataGenerator(rescale=1.0/255.0,
+                             rotation_range=20,
+                             width_shift_range=0.2,
+                             height_shift_range=0.2,
+                             shear_range=0.2,
+                             zoom_range=0.2,
+                             horizontal_flip=True,
+                             fill_mode='nearest')
+
+tes_dir = os.path.join(base_dir, 'Test')
+
+test_generator = datagen.flow_from_directory(
+    tes_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=False  # Jangan mengacak urutan gambar
+
+train_dir = os.path.join(base_dir, 'Train')
+
+train_generator = datagen.flow_from_directory(
+    train_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=False  # Jangan mengacak urutan gambar
+)
+
+val_datagen = ImageDataGenerator(rescale=1.0/255.0)
+
+val_dir = os.path.join(base_dir, 'Val')
+
+val_generator = val_datagen.flow_from_directory(
+    val_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=False  # Jangan mengacak urutan gambar
+)
+
+tes2_dir = os.path.join(base_dir, 'test2')
+
+test2_generator = datagen.flow_from_directory(
+    tes2_dir,
+    target_size=(224, 224),
+    batch_size=32,
+    class_mode='categorical',
+    shuffle=False  # Jangan mengacak urutan gambar
+)
+
+# Jumlah Data Original
+gereja_katolik_santo_yusuf = os.path.join(tes_dir, 'gereja katolik santo yusuf/')
+ketandan = os.path.join(tes_dir, 'ketandan/')
+masjid_maguyuono = os.path.join(tes_dir, 'masjid maguyuono/')
+
+class_names = ['gereja katolik santo yusuf',
+                'ketandan',
+                'masjid maguyuono']
+total_tes_data = 0
+
+for class_name in class_names:
+    class_folder = os.path.join(tes_dir, class_name)
+    num_images = len(os.listdir(class_folder))
+    print(f'Jumlah gambar {class_name} :', num_images)
+    total_tes_data += num_images
+
+print('Total data Testing:', total_tes_data)
+
+
+# Jumlah Data Training
+gereja_katolik_santo_yusuf = os.path.join(train_dir, 'gereja katolik santo yusuf/')
+ketandan = os.path.join(train_dir, 'ketandan/')
+masjid_maguyuono = os.path.join(train_dir, 'masjid maguyuono/')
+
+class_names = ['gereja katolik santo yusuf',
+                'ketandan',
+                'masjid maguyuono']
+total_train_data = 0
+
+for class_name in class_names:
+    class_folder = os.path.join(train_dir, class_name)
+    num_images = len(os.listdir(class_folder))
+    print(f'Jumlah gambar {class_name} :', num_images)
+    total_train_data += num_images
+
+print('Total data training:', total_train_data)
+
+
+# Jumlah Data Original
+gereja_katolik_santo_yusuf = os.path.join(val_dir, 'gereja katolik santo yusuf/')
+ketandan = os.path.join(val_dir, 'ketandan/')
+masjid_maguyuono = os.path.join(val_dir, 'masjid maguyuono/')
+
+class_names = ['gereja katolik santo yusuf',
+                'ketandan',
+                'masjid maguyuono']
+total_val_data = 0
+
+for class_name in class_names:
+    class_folder = os.path.join(val_dir, class_name)
+    num_images = len(os.listdir(class_folder))
+    print(f'Jumlah gambar {class_name} :', num_images)
+    total_val_data += num_images
+
+print('Total data Validation:', total_val_data)
+
+
+# check type of each class
+print(f"The Train has {train_generator.num_classes} classes: {train_generator.class_indices}")
+print(f"The Validation has {val_generator.num_classes} classes: {val_generator.class_indices}")
+print(f"The Test has {test_generator.num_classes} classes: {test_generator.class_indices}")
+
+# check shapes
+for image_batch, labels_batch in train_generator:
+    print(f"Train Shape: {image_batch.shape} (Bathes = {len(train_generator)})")
+    print(f"Train label: {labels_batch.shape}\n")
+    break
+for image_batch, labels_batch in val_generator:
+    print(f"Validation Shape: {image_batch.shape} (Bathes = {len(val_generator)})")
+    print(f"Validation label: {labels_batch.shape}\n")
+    break
+for image_batch, labels_batch in test_generator:
+    print(f"Testing Shape: {image_batch.shape} (Bathes = {len(test_generator)})")
+    print(f"Testing label: {labels_batch.shape}\n")
+    break
